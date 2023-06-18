@@ -24,11 +24,6 @@ characters = {              # Other characters with different width
 # Characters that require Shift to be pressed
 shift_characters = ["{", "}", ":", "\"", "<", ">", "?", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "~"]
 
-# Global variables
-pos_next_page = None
-pos_sign = None
-book_name = None
-
 
 def pause() -> None:
     """
@@ -131,7 +126,7 @@ def type_word(word: str) -> None:
         keyboard.release("SHIFT")
 
 
-def next_page() -> None:
+def next_page(pos_next_page: tuple) -> None:
     """
     Goes to the next page of the book. This uses pos_next_page to get the position of the next page button.
 
@@ -141,12 +136,13 @@ def next_page() -> None:
     mouse.click("left")
 
 
-def sign(number=None, next_book=None) -> None:
+def sign(book_name: str, pos_sign: tuple, number=None, next_book=None) -> None:
     """
     Sign the book. This uses pos_sign to get the position of the sign button. Also uses book_name to get the name.
 
     If next_book is None, it won't go to the next empty book
 
+    :param pos_sign:    tuple or list, position of
     :param number:      str, book number
     :param next_book:   str, next book's number. This is used to grab the next book in the bar on the bottom
     :return: None
@@ -183,7 +179,8 @@ def sign(number=None, next_book=None) -> None:
     time.sleep(0.2)
 
 
-def write_book(start_page=1, start_book=1, type_book=True, numbers=True) -> int:
+def write_book(book_name=None, pos_next_page=None, pos_sign=None, start_page=1, start_book=1,
+               type_book=True, numbers=True) -> int:
     """
     Main function. This will start typing out words from the input file. It will keep track on when to go to
     the next page / book.
@@ -224,7 +221,7 @@ def write_book(start_page=1, start_book=1, type_book=True, numbers=True) -> int:
         if row > MAX_ROWS:
             # Reached the end of the page
             if do_type():
-                next_page()
+                next_page(pos_next_page)
             page += 1
             row = 1
             row_width = width
@@ -244,11 +241,11 @@ def write_book(start_page=1, start_book=1, type_book=True, numbers=True) -> int:
                 # Checking if we have enough books in the toolbar
                 if tool_book > BOTTOM_BAR:
                     tool_book = 1
-                    sign(temp)
+                    sign(book_name, pos_sign, number=temp)
                     print("Ran out of books in the toolbar. Grab more books.")
                     pause()
                 else:
-                    sign(temp, str(tool_book))
+                    sign(book_name, pos_sign, number=temp, next_book=str(tool_book))
             book += 1
             page = 1
 
@@ -267,19 +264,15 @@ def write_book(start_page=1, start_book=1, type_book=True, numbers=True) -> int:
     # Sign the book
     if do_type():
         if numbers:
-            sign(str(book))
+            sign(book_name, pos_sign, number=str(book))
         else:
-            sign()
+            sign(book_name, pos_sign)
 
     print(f"Books: {book}. Pages {page}")
     return book
 
 
 def main():
-    global book_name
-    global pos_next_page
-    global pos_sign
-
     # Telling the user how many books / pages it'll take. Also grabbing the total books
     total = write_book(type_book=False)
 
@@ -309,7 +302,7 @@ def main():
     print(pos_sign)
 
     pause()
-    write_book(numbers=numbers)
+    write_book(book_name=book_name, pos_next_page=pos_next_page, pos_sign=pos_sign, numbers=numbers)
 
 
 if __name__ == "__main__":
