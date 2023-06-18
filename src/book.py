@@ -1,3 +1,4 @@
+from multiprocessing import Process
 import typing
 import time
 import mouse
@@ -289,7 +290,7 @@ def main():
           "your toolbar")
     pause()
 
-    print("\nPress the next page button, then back.")
+    print("Press the next page button, then back.")
     mouse.wait(target_types=["down"])
     pos_next_page = mouse.get_position()
     mouse.wait(target_types=["down"])
@@ -301,8 +302,18 @@ def main():
     mouse.wait(target_types=["down"])
     print(pos_sign)
 
+    print("\nReady to write the book. When the program is running, press \"esc\" to stop it.")
     pause()
-    write_book(book_name=book_name, pos_next_page=pos_next_page, pos_sign=pos_sign, numbers=numbers)
+
+    process = Process(target=write_book, kwargs={"book_name": book_name, "pos_next_page": pos_next_page,
+                                                 "pos_sign": pos_sign, "numbers": numbers})
+
+    # Adding a hook to stop the book writing when the user presses, "esc"
+    keyboard.hook_key("esc", lambda event: process.terminate())
+
+    # Starting the process
+    process.start()
+    process.join()
 
 
 if __name__ == "__main__":
