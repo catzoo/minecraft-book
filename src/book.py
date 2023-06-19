@@ -290,7 +290,7 @@ def main():
           "your toolbar")
     pause()
 
-    print("Press the next page button, then back.")
+    print("\nPress the next page button, then back.")
     mouse.wait(target_types=["down"])
     pos_next_page = mouse.get_position()
     mouse.wait(target_types=["down"])
